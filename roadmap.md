@@ -3,11 +3,11 @@
 - [x] Implement accounts, workspace creation, campaigns, ads, and analytics dashboard.
 - [x] Implement authenticated simulator and key-verified click ingestion with transactional deduplication.
 - [x] Add basic fraud detection and public health check.
-- [x] Renew CLICK_IP_HMAC_SECRET after project remix.
-- [ ] deploy/frontend: browser dashboard (login/JWT, advertiser analytics, infrastructure status, X-Served-By, click simulator) wired to the real Docker API.
-- [ ] deploy/grafana: provisioned Grafana dashboards from real Prometheus metrics (API, Kafka, workers, business, infra).
-- [ ] deploy/tests: automated tests (auth, ingestion, dedup, aggregation, late events, fraud rules, tenant isolation, Kafka/DLQ).
-- [ ] deploy/loadtest: Locust setup (100/500/1000 users, 3-min test, 30-s ramp, ~5% duplicates).
-- [ ] deploy/README.md: architecture, startup, scaling, monitoring, testing, 7–10 min demo flow.
+- [x] Renew CLICK_IP_HMAC_SECRET after project remix (deleted + regenerated, 64 chars).
+- [x] deploy/frontend: browser dashboard (login/JWT, advertiser analytics, infrastructure status, X-Served-By, click simulator) wired to the real Docker API.
+- [x] deploy/grafana: provisioned Grafana dashboards from real Prometheus metrics (API, Kafka, workers, business, infra) — provisioning/ + dashboards/advanta-overview.json.
+- [x] deploy/tests: automated tests (auth, ingestion, dedup, aggregation, late events, fraud rules, tenant isolation, Kafka/DLQ) — unit tests pass (22/22).
+- [x] deploy/loadtest: Locust setup (100/500/1000 users, 3-min test, 30-s ramp, ~5% duplicates).
+- [x] deploy/README.md: architecture, startup, scaling, monitoring, testing, 7–10 min demo flow.
 - [ ] Run and integration-test the full Docker stack (`docker compose up --build --scale api=3 --scale aggregator=3`). Blocked: this preview cannot run Docker; must be run on the user's machine.
 - [ ] Failure testing and load-test numbers. Blocked: same — requires running Docker stack.
