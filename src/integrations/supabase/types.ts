@@ -14,16 +14,372 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ads: {
+        Row: {
+          advertiser_id: string
+          campaign_id: string
+          created_at: string
+          id: string
+          title: string
+        }
+        Insert: {
+          advertiser_id: string
+          campaign_id: string
+          created_at?: string
+          id: string
+          title: string
+        }
+        Update: {
+          advertiser_id?: string
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advertisers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      aggregated_clicks: {
+        Row: {
+          ad_id: string
+          advertiser_id: string
+          campaign_id: string
+          click_count: number
+          country: string
+          device: string
+          unique_viewers: number
+          window_start: string
+        }
+        Insert: {
+          ad_id: string
+          advertiser_id: string
+          campaign_id: string
+          click_count?: number
+          country: string
+          device: string
+          unique_viewers?: number
+          window_start: string
+        }
+        Update: {
+          ad_id?: string
+          advertiser_id?: string
+          campaign_id?: string
+          click_count?: number
+          country?: string
+          device?: string
+          unique_viewers?: number
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aggregated_clicks_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aggregated_clicks_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aggregated_clicks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          advertiser_id: string
+          created_at: string
+          id: string
+          name: string
+          status: string
+        }
+        Insert: {
+          advertiser_id: string
+          created_at?: string
+          id: string
+          name: string
+          status?: string
+        }
+        Update: {
+          advertiser_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      click_events: {
+        Row: {
+          ad_id: string
+          advertiser_id: string
+          campaign_id: string
+          country: string
+          device: string
+          event_id: string
+          event_time: string
+          ip_hash: string | null
+          received_at: string
+          viewer_id: string
+        }
+        Insert: {
+          ad_id: string
+          advertiser_id: string
+          campaign_id: string
+          country: string
+          device: string
+          event_id: string
+          event_time: string
+          ip_hash?: string | null
+          received_at?: string
+          viewer_id: string
+        }
+        Update: {
+          ad_id?: string
+          advertiser_id?: string
+          campaign_id?: string
+          country?: string
+          device?: string
+          event_id?: string
+          event_time?: string
+          ip_hash?: string | null
+          received_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "click_events_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "click_events_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "click_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ingest_keys: {
+        Row: {
+          advertiser_id: string
+          created_at: string
+          id: string
+          key_hash: string
+          label: string
+          revoked_at: string | null
+        }
+        Insert: {
+          advertiser_id: string
+          created_at?: string
+          id?: string
+          key_hash: string
+          label: string
+          revoked_at?: string | null
+        }
+        Update: {
+          advertiser_id?: string
+          created_at?: string
+          id?: string
+          key_hash?: string
+          label?: string
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingest_keys_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          advertiser_id: string | null
+          created_at: string
+          display_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          advertiser_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          advertiser_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suspicious_clicks: {
+        Row: {
+          ad_id: string
+          advertiser_id: string
+          campaign_id: string
+          click_count: number
+          details: Json
+          detected_at: string
+          id: number
+          rule: string
+          subject: string
+          window_start: string
+        }
+        Insert: {
+          ad_id: string
+          advertiser_id: string
+          campaign_id: string
+          click_count: number
+          details?: Json
+          detected_at?: string
+          id?: never
+          rule: string
+          subject: string
+          window_start: string
+        }
+        Update: {
+          ad_id?: string
+          advertiser_id?: string
+          campaign_id?: string
+          click_count?: number
+          details?: Json
+          detected_at?: string
+          id?: never
+          rule?: string
+          subject?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suspicious_clicks_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_my_advertiser: { Args: { _name: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      ingest_click: {
+        Args: {
+          _ad_id: string
+          _country: string
+          _device: string
+          _event_id: string
+          _event_time: string
+          _ip_hash?: string
+          _viewer_id: string
+        }
+        Returns: boolean
+      }
+      my_advertiser_id: { Args: never; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "advertiser"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +506,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "advertiser"],
+    },
   },
 } as const
