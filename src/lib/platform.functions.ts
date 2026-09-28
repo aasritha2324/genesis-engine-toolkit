@@ -53,15 +53,16 @@ export const createIngestKey = createServerFn({ method: 'POST' }).middleware([re
   if (error) throw new Error(error.message)
   return key
 })
-const clickInput = z.object({ event_id:z.string().min(8).max(120), ad_id:z.string().min(1), viewer_id:z.string().min(1).max(120), timestamp:z.string().datetime({offset:true}), country:z.string().regex(/^[A-Z]{2}$/), device:z.enum(['mobile','desktop','tablet','other']), ip:z.string().optional() })
 export const simulateClicks = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).inputValidator((input: unknown) => z.object({ adId:z.string(), count:z.number().int().min(1).max(100), country:z.string().regex(/^[A-Z]{2}$/), device:z.enum(['mobile','desktop','tablet','other']), repeatViewer:z.boolean().default(false) }).parse(input)).handler(async ({ data,context }) => {
   const { data: ad } = await context.supabase.from('ads').select('id').eq('id',data.adId).single()
   if (!ad) throw new Error('Ad not found')
+  const secret = process.env['CLICK_IP_HMAC_SECRET']
+  if (!secret) throw new Error('Click simulator is unavailable')
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
   let accepted=0
   for(let i=0;i<data.count;i++) {
     const viewer = data.repeatViewer ? 'demo-repeat-viewer' : `demo-${randomBytes(8).toString('hex')}`
-    const {data: inserted,error} = await supabaseAdmin.rpc('server_ingest_click',{_event_id:`evt_${crypto.randomUUID()}`,_ad_id:data.adId,_viewer_id:createHash('sha256').update(viewer).digest('hex'),_event_time:new Date().toISOString(),_country:data.country,_device:data.device,_ip_hash:data.repeatViewer ? createHmac('sha256',process.env['CLICK_IP_HMAC_SECRET'] || 'demo').update('demo-ip').digest('hex') : null})
+    const {data: inserted,error} = await supabaseAdmin.rpc('server_ingest_click',{_event_id:`evt_${crypto.randomUUID()}`,_ad_id:data.adId,_viewer_id:createHmac('sha256',secret).update(viewer).digest('hex'),_event_time:new Date().toISOString(),_country:data.country,_device:data.device,_ip_hash:data.repeatViewer ? createHmac('sha256',secret).update('demo-ip').digest('hex') : undefined})
     if(error) throw new Error(error.message)
     if(inserted) accepted++
   }
