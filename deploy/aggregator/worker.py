@@ -60,8 +60,10 @@ class Rebalance(ConsumerRebalanceListener):
     async def on_partitions_revoked(self, revoked):
         for tp in revoked:
             watermarks.pop(tp.partition, None)
-            LAG.remove(str(tp.partition)) if str(tp.partition) in _lag_labels else None
-            _lag_labels.discard(str(tp.partition))
+            label = str(tp.partition)
+            if label in _lag_labels:
+                LAG.remove(label)
+                _lag_labels.discard(label)
         log.info("partitions revoked: %s", sorted(tp.partition for tp in revoked))
 
     async def on_partitions_assigned(self, assigned):
@@ -215,15 +217,12 @@ async def process_batch(records, pool: asyncpg.Pool, r: aioredis.Redis, producer
         for e in to_apply:
             claim.set(f"dedup:{e.event_id}", "1", nx=True, ex=DEDUP_TTL)
         claimed = await claim.execute()
-        inserted_ids = {e.event_id for e, _ in inserted}
         pipe = r.pipeline()
         processed_by_adv: dict[str, int] = defaultdict(int)
         for e, got in zip(to_apply, claimed):
             if not got:
                 continue
-            if e.event_id not in inserted_ids:
-                # Crash recovery path: PG already had it but Redis never got its counters.
-                pass
+            # got=True for a PG duplicate means crash recovery: PG committed but Redis never got its counters.
             processed_by_adv[e.advertiser_id] += 1
             m = int(P.window_start(e.event_time).timestamp())
             for key in (f"clicks:ad:{e.ad_id}:{m}", f"clicks:campaign:{e.campaign_id}:{m}", f"clicks:adv:{e.advertiser_id}:{m}"):
