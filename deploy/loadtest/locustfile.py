@@ -82,6 +82,7 @@ def _ensure_setup(client):
                         json={"label": "locust"})
         _state["api_key"] = r.json()["key"]
     _state["headers"] = {"X-API-Key": _state["api_key"], "Content-Type": "application/json"}
+    _state["read_headers"] = {"Authorization": f"Bearer {token}"}
     _state["setup_done"] = True
 
 
@@ -134,9 +135,8 @@ class IngestUser(HttpUser):
 
 
 def _read_headers():
-    # Dashboard reads need the bearer token from a fresh login (JWT TTL 12h).
-    cached = IngestUser.__dict__.get("_read_token")
-    return {"Authorization": f"Bearer {cached}"} if cached else {}
+    # Dashboard reads use the bearer token minted during setup.
+    return _state.get("read_headers", {})
 
 
 def _now_iso() -> str:
