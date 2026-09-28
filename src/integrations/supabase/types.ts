@@ -356,27 +356,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_my_advertiser: { Args: { _name: string }; Returns: string }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      ingest_click: {
-        Args: {
-          _ad_id: string
-          _country: string
-          _device: string
-          _event_id: string
-          _event_time: string
-          _ip_hash?: string
-          _viewer_id: string
-        }
-        Returns: boolean
-      }
-      my_advertiser_id: { Args: never; Returns: string }
+      [_ in never]: never
     }
     Enums: {
       app_role: "admin" | "advertiser"
