@@ -6,7 +6,6 @@ return 202. Aggregation happens asynchronously in the aggregator workers.
 """
 import asyncio
 import json
-import re
 import secrets
 import time
 from contextlib import asynccontextmanager
@@ -115,14 +114,14 @@ if S.cors_origins:
 @app.middleware("http")
 async def observe(request: Request, call_next):
     started = time.perf_counter()
-    route = request.url.path
-    if len(request.url.path) > 1 and re.search(r"/[^/]+/[^/]+/", route + "/"):
-        route = re.sub(r"^(/api/[a-z-]+)/.+$", r"\1/{id}", route)
     try:
         response = await call_next(request)
     except Exception:
         ERRORS.labels("api", "unhandled").inc()
         response = JSONResponse({"error": "INTERNAL"}, status_code=500)
+    # Use the route template (e.g. /api/ads/{ad_id}) to keep metric cardinality bounded.
+    matched = request.scope.get("route")
+    route = getattr(matched, "path", "unmatched")
     response.headers["X-Served-By"] = S.instance
     if route != "/metrics":
         HTTP_REQUESTS.labels(request.method, route, str(response.status_code)).inc()
