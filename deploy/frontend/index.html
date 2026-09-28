@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AdVanta — Pipeline Console</title>
+  <meta name="description" content="AdVanta distributed click-analytics console: live pipeline metrics, fraud detections and a click simulator against the Docker stack." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script>
+    // Landing shell: the auth screen or the console is rendered by app.js.
+    document.getElementById('root').innerHTML = '<div class="boot">Loading console…</div>';
+    window.addEventListener('error', function (e) {
+      var t = document.getElementById('toast');
+      if (t) { t.hidden = false; t.textContent = 'Script error: ' + e.message; setTimeout(function(){ t.hidden = true; }, 5000); }
+    });
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>
