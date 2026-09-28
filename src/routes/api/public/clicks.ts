@@ -25,7 +25,7 @@ export const Route = createFileRoute('/api/public/clicks')({
       if(!secret) return Response.json({error:{code:'UNAVAILABLE',message:'Ingestion unavailable'}},{status:503})
       const ipHash=event.ip ? createHmac('sha256',secret).update(event.ip).digest('hex') : null
       const viewerHash=createHmac('sha256',secret).update(event.viewer_id).digest('hex')
-      const {data,error}=await supabaseAdmin.rpc('server_ingest_click',{_event_id:event.event_id,_ad_id:event.ad_id,_viewer_id:viewerHash,_event_time:event.timestamp,_country:event.country,_device:event.device,_ip_hash:ipHash??undefined})
+      const {data,error}=await supabaseAdmin.rpc('server_ingest_click',{_event_id:event.event_id,_ad_id:event.ad_id,_viewer_id:viewerHash,_event_time:event.timestamp,_country:event.country,_device:event.device,...(ipHash ? {_ip_hash:ipHash} : {})})
       if(error) return Response.json({error:{code:'INGEST_FAILED',message:error.message}},{status:422})
       if(data) accepted++; else duplicates++
     }

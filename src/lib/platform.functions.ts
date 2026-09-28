@@ -62,7 +62,7 @@ export const simulateClicks = createServerFn({ method: 'POST' }).middleware([req
   let accepted=0
   for(let i=0;i<data.count;i++) {
     const viewer = data.repeatViewer ? 'demo-repeat-viewer' : `demo-${randomBytes(8).toString('hex')}`
-    const {data: inserted,error} = await supabaseAdmin.rpc('server_ingest_click',{_event_id:`evt_${crypto.randomUUID()}`,_ad_id:data.adId,_viewer_id:createHmac('sha256',secret).update(viewer).digest('hex'),_event_time:new Date().toISOString(),_country:data.country,_device:data.device,_ip_hash:data.repeatViewer ? createHmac('sha256',secret).update('demo-ip').digest('hex') : undefined})
+    const {data: inserted,error} = await supabaseAdmin.rpc('server_ingest_click',{_event_id:`evt_${crypto.randomUUID()}`,_ad_id:data.adId,_viewer_id:createHmac('sha256',secret).update(viewer).digest('hex'),_event_time:new Date().toISOString(),_country:data.country,_device:data.device,...(data.repeatViewer ? {_ip_hash:createHmac('sha256',secret).update('demo-ip').digest('hex')} : {})})
     if(error) throw new Error(error.message)
     if(inserted) accepted++
   }
