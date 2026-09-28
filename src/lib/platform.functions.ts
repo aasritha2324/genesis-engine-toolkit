@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { createHash, createHmac, randomBytes } from 'node:crypto'
 
 const organization = z.object({ name: z.string().trim().min(2).max(100) })
-export const setupOrganization = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).inputValidator((input: unknown) => organization.parse(input)).handler(async ({ data, context }) => {
+export const setupOrganization = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).validator((input: unknown) => organization.parse(input)).handler(async ({ data, context }) => {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
   const { data: id, error } = await supabaseAdmin.rpc('server_create_advertiser', { _user_id: context.userId, _name: data.name })
   if (error) throw new Error(error.message)
@@ -28,7 +28,7 @@ export const getDashboard = createServerFn({ method: 'GET' }).middleware([requir
   return { profile, roles: roles ?? [], advertisers: advertisers ?? [], campaigns: campaigns ?? [], ads: ads ?? [], aggregates: aggregates ?? [], alerts: alerts ?? [], events: events ?? [] }
 })
 
-export const createCampaign = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).inputValidator((input: unknown) => z.object({ name: z.string().trim().min(2).max(100) }).parse(input)).handler(async ({ data, context }) => {
+export const createCampaign = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).validator((input: unknown) => z.object({ name: z.string().trim().min(2).max(100) }).parse(input)).handler(async ({ data, context }) => {
   const { data: profile } = await context.supabase.from('profiles').select('advertiser_id').eq('user_id',context.userId).single()
   if (!profile?.advertiser_id) throw new Error('Create an organization first')
   const id = `camp_${randomBytes(6).toString('hex')}`
@@ -36,7 +36,7 @@ export const createCampaign = createServerFn({ method: 'POST' }).middleware([req
   if (error) throw new Error(error.message)
   return id
 })
-export const createAd = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).inputValidator((input: unknown) => z.object({ title:z.string().trim().min(2).max(100), campaignId:z.string().min(1) }).parse(input)).handler(async ({ data, context }) => {
+export const createAd = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).validator((input: unknown) => z.object({ title:z.string().trim().min(2).max(100), campaignId:z.string().min(1) }).parse(input)).handler(async ({ data, context }) => {
   const { data: campaign } = await context.supabase.from('campaigns').select('advertiser_id').eq('id',data.campaignId).single()
   if (!campaign) throw new Error('Campaign not found')
   const id = `ad_${randomBytes(6).toString('hex')}`
@@ -53,7 +53,7 @@ export const createIngestKey = createServerFn({ method: 'POST' }).middleware([re
   if (error) throw new Error(error.message)
   return key
 })
-export const simulateClicks = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).inputValidator((input: unknown) => z.object({ adId:z.string(), count:z.number().int().min(1).max(100), country:z.string().regex(/^[A-Z]{2}$/), device:z.enum(['mobile','desktop','tablet','other']), repeatViewer:z.boolean().default(false) }).parse(input)).handler(async ({ data,context }) => {
+export const simulateClicks = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).validator((input: unknown) => z.object({ adId:z.string(), count:z.number().int().min(1).max(100), country:z.string().regex(/^[A-Z]{2}$/), device:z.enum(['mobile','desktop','tablet','other']), repeatViewer:z.boolean().default(false) }).parse(input)).handler(async ({ data,context }) => {
   const { data: ad } = await context.supabase.from('ads').select('id').eq('id',data.adId).single()
   if (!ad) throw new Error('Ad not found')
   const secret = process.env['CLICK_IP_HMAC_SECRET']
