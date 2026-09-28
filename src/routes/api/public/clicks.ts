@@ -10,6 +10,7 @@ export const Route = createFileRoute('/api/public/clicks')({
     const { supabaseAdmin }=await import('@/integrations/supabase/client.server')
     const { data: credential }=await supabaseAdmin.from('ingest_keys').select('advertiser_id').eq('key_hash',createHash('sha256').update(key).digest('hex')).is('revoked_at',null).maybeSingle()
     if(!credential) return Response.json({error:{code:'UNAUTHORIZED',message:'Invalid API key'}},{status:401})
+    if(request.headers.get('content-length') && Number(request.headers.get('content-length')) > 300000) return Response.json({error:{code:'TOO_LARGE',message:'Batch is too large'}},{status:413})
     let input:unknown
     try { input=await request.json() } catch { return Response.json({error:{code:'INVALID_JSON',message:'Invalid JSON'}},{status:400}) }
     const parsed=z.union([click,z.object({events:z.array(click).min(1).max(500)})]).safeParse(input)
@@ -24,7 +25,7 @@ export const Route = createFileRoute('/api/public/clicks')({
       if(!secret) return Response.json({error:{code:'UNAVAILABLE',message:'Ingestion unavailable'}},{status:503})
       const ipHash=event.ip ? createHmac('sha256',secret).update(event.ip).digest('hex') : null
       const viewerHash=createHmac('sha256',secret).update(event.viewer_id).digest('hex')
-      const {data,error}=await supabaseAdmin.rpc('server_ingest_click',{_event_id:event.event_id,_ad_id:event.ad_id,_viewer_id:viewerHash,_event_time:event.timestamp,_country:event.country,_device:event.device,_ip_hash:ipHash})
+      const {data,error}=await supabaseAdmin.rpc('server_ingest_click',{_event_id:event.event_id,_ad_id:event.ad_id,_viewer_id:viewerHash,_event_time:event.timestamp,_country:event.country,_device:event.device,_ip_hash:ipHash??undefined})
       if(error) return Response.json({error:{code:'INGEST_FAILED',message:error.message}},{status:422})
       if(data) accepted++; else duplicates++
     }
