@@ -1,4 +1,4 @@
-# Remix of Remix of Project Lovable: Design & Implementation
+Design & Implementation
 
 this is the design of our project.help me implement this completely.
 
